@@ -4,6 +4,7 @@ import type { Request, Response } from "express"
 import cors from "cors"
 import type { CorsOptions } from "cors"
 import cookieParser from "cookie-parser"
+import preferencesRouter from './routes/preferences.js'
 
 const app = express()
 
@@ -38,6 +39,8 @@ app.use(cors(corsOptions))
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(cookieParser())
+
+app.use('/preferences', preferencesRouter)
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

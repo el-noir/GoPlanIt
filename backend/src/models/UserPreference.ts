@@ -5,6 +5,31 @@ export interface ITravelDates{
     end: Date;
 }
 
+export interface ItineraryActivity {
+    time: string;
+    title: string;
+    description: string;
+    location?: string;
+    link?: string;
+}
+
+export interface ItineraryDay {
+    day: number;
+    activities: ItineraryActivity[];
+}
+
+export interface ItineraryPlan {
+    destination?: string;
+    days: ItineraryDay[];
+    notes?: string;
+    budgetTips?: string[];
+    suggestedBookings?: Array<{
+        type: 'hotel' | 'transport' | 'activity';
+        name: string;
+        link: string;
+    }>
+}
+
 export interface IUserPreference extends Document{
     userId: string;
     email: string;
@@ -13,7 +38,8 @@ export interface IUserPreference extends Document{
     interests: string[];
     transportPreferences: string[];
     accommodationPreferences: string[];
-    createdAt: Date
+    createdAt: Date;
+    itinerary?: ItineraryPlan;
 }
 
 const TravelDatesSchema: Schema = new Schema({
@@ -30,6 +56,7 @@ const UserPreferenceSchema: Schema = new Schema({
     transportPreferences: { type: [String], required: true },
     accommodationPreferences: { type: [String], required: true },
     createdAt: { type: Date, default: Date.now },
+    itinerary: { type: Schema.Types.Mixed, required: false },
 })
 
 const UserPreference = mongoose.model<IUserPreference>('UserPreference', UserPreferenceSchema);
