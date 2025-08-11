@@ -58,7 +58,7 @@ export const onUserPreferenceCreated = inngest.createFunction(
           The GoPlanIt Team
         `
 
-        await sendMail(pref.email, "Your Personalized Travel Itinerary is Ready!", emailContent.trim())
+        // await sendMail(pref.email, "Your Personalized Travel Itinerary is Ready!", emailContent.trim())
       })
 
       return { success: true }
