@@ -19,18 +19,20 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "mongoose": "^8.17.1"
+    "mongoose": "^8.17.1",
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
+    "@types/nodemailer": "^6.4.15",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.3",
     "@types/node": "^24.2.1",
-    "@types/cors": "^2.8.17",
-    "@types/cookie-parser": "^1.4.3",
     "install": "^0.13.0",
     "nodemon": "^3.1.10",
-    "tsx": "^4.19.0",
     "npm": "^11.5.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.0",
     "typescript": "^5.9.2"
   }
 }
