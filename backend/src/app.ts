@@ -1,18 +1,21 @@
+import 'dotenv/config'
 import express from "express"
+import type { Request, Response } from "express"
 import cors from "cors"
+import type { CorsOptions } from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
 
-const corsOptions = {
-  origin: (origin, callback) => {
+const corsOptions: CorsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin) return callback(null, true)
 
     const allowedOrigins = [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
       process.env.CORS_ORIGIN,
-    ].filter(Boolean)
+    ].filter((o): o is string => Boolean(o))
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true)
@@ -36,7 +39,7 @@ app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(cookieParser())
 
-app.get("/health", (req, res) => {
+app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Server is running successfully",
