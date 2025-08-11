@@ -5,6 +5,9 @@ import cors from "cors"
 import type { CorsOptions } from "cors"
 import cookieParser from "cookie-parser"
 import preferencesRouter from './routes/preferences.js'
+import {inngest} from './inngest/client.js'
+import {serve} from 'inngest/express'
+import { onUserPreferenceCreated } from './inngest/functions/on-user-preference.js'
 
 const app = express()
 
@@ -41,6 +44,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(cookieParser())
 
 app.use('/preferences', preferencesRouter)
+
+app.use("/api/inngest", serve({
+  client: inngest,
+  functions: [onUserPreferenceCreated]
+}));
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
