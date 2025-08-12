@@ -1,13 +1,13 @@
-import 'dotenv/config'
+import "dotenv/config"
 import express from "express"
 import type { Request, Response } from "express"
 import cors from "cors"
 import type { CorsOptions } from "cors"
 import cookieParser from "cookie-parser"
-import preferencesRouter from './routes/preferences.js'
-import {inngest} from './inngest/client.js'
-import {serve} from 'inngest/express'
-import { onUserPreferenceCreated } from './inngest/functions/on-user-preference.js'
+import preferencesRouter from "./routes/preferences.js"
+import { inngest } from "./inngest/client.js"
+import { serve } from "inngest/express"
+import { onUserPreferenceCreated } from "./inngest/functions/on-user-preference.js"
 
 const app = express()
 
@@ -15,11 +15,9 @@ const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin) return callback(null, true)
 
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      process.env.CORS_ORIGIN,
-    ].filter((o): o is string => Boolean(o))
+    const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173", process.env.CORS_ORIGIN].filter(
+      (o): o is string => Boolean(o),
+    )
 
     if (allowedOrigins.includes(origin)) {
       callback(null, true)
@@ -29,11 +27,7 @@ const corsOptions: CorsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: [
-    "Origin",
-    "Content-Type",
-    "Authorization",
-  ],
+  allowedHeaders: ["Origin", "Content-Type", "Authorization"],
 }
 
 app.use(cors(corsOptions))
@@ -43,12 +37,15 @@ app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(cookieParser())
 
-app.use('/preferences', preferencesRouter)
+app.use("/api/user-preferences", preferencesRouter)
 
-app.use("/api/inngest", serve({
-  client: inngest,
-  functions: [onUserPreferenceCreated]
-}));
+app.use(
+  "/api/inngest",
+  serve({
+    client: inngest,
+    functions: [onUserPreferenceCreated],
+  }),
+)
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

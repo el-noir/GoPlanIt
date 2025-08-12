@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import UserPreference from "../models/UserPreference.js"
 import { inngest } from "../inngest/client.js"
+import { cacheService } from "../services/cache.js"
 
 export class UserPreferenceController {
   static async createPreference(req: Request, res: Response): Promise<Response> {
@@ -60,10 +61,18 @@ export class UserPreferenceController {
         tripType: tripType || "LEISURE",
       })
 
+      await cacheService.setProcessingStatus(String(doc._id), {
+        status: "initiated",
+        message: "Starting itinerary generation with real travel data",
+        progress: 0,
+        estimatedCompletion: new Date(Date.now() + 3 * 60 * 1000), // 3 minutes
+      })
+
       await inngest.send({
         name: "user.preference/created",
         data: {
-          userPreferenceId: String(doc._id),
+          preferenceId: String(doc._id), // Changed from userPreferenceId to preferenceId
+          userId: userId, // Added userId field that Inngest function expects
           originLocationCode,
           destinationLocationCode,
           travelDates,
@@ -74,11 +83,47 @@ export class UserPreferenceController {
         id: doc._id,
         message: "Preference saved; AI-powered itinerary with real travel data will be generated.",
         estimatedProcessingTime: "2-3 minutes",
+        statusEndpoint: `/api/user-preferences/${doc._id}/status`,
       })
     } catch (error) {
       console.error("Error creating user preference:", error)
       return res.status(500).json({
         message: "Failed to create preference",
+        error: process.env.NODE_ENV === "development" ? (error as Error).message : undefined,
+      })
+    }
+  }
+
+  static async getProcessingStatus(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params
+
+      if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({ message: "Invalid preference ID format" })
+      }
+
+      const status = await cacheService.getProcessingStatus(id)
+
+      if (!status) {
+        // Check if preference exists in database
+        const preference = await UserPreference.findById(id)
+        if (!preference) {
+          return res.status(404).json({ message: "Preference not found" })
+        }
+
+        // Return completed status if itinerary exists
+        return res.json({
+          status: preference.itinerary ? "completed" : "processing",
+          message: preference.itinerary ? "Itinerary generation completed" : "Processing in progress",
+          progress: preference.itinerary ? 100 : 50,
+        })
+      }
+
+      return res.json(status)
+    } catch (error) {
+      console.error("Error fetching processing status:", error)
+      return res.status(500).json({
+        message: "Failed to fetch status",
         error: process.env.NODE_ENV === "development" ? (error as Error).message : undefined,
       })
     }
